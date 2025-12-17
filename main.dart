@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 
-// Define the Tag class to represent colored tags
 class Tag {
   final String name;
   final Color color;
@@ -83,7 +82,7 @@ class TaskManagerScreen extends StatefulWidget {
 
 class _TaskManagerScreenState extends State<TaskManagerScreen> with TickerProviderStateMixin {
   List<Task> tasks = [];
-  List<Tag> availableTags = []; // Store available tags
+  List<Tag> availableTags = []; 
   bool isLoading = false;
   String selectedFilter = 'all';
   late AnimationController _animationController;
@@ -131,7 +130,6 @@ class _TaskManagerScreenState extends State<TaskManagerScreen> with TickerProvid
         final data = json.decode(response.body);
         if (data['success'] == true) {
           final fetchedTasks = (data['tasks'] as List).map((taskJson) => Task.fromJson(taskJson)).toList();
-          // Sort by due date (null last) and then by priority
           fetchedTasks.sort((a, b) {
             if (a.dueDate == null && b.dueDate != null) return 1;
             if (a.dueDate != null && b.dueDate == null) return -1;
@@ -143,7 +141,7 @@ class _TaskManagerScreenState extends State<TaskManagerScreen> with TickerProvid
             final aPriority = priorityOrder[a.priority.toLowerCase()] ?? 0;
             final bPriority = priorityOrder[b.priority.toLowerCase()] ?? 0;
             return bPriority.compareTo(aPriority);
-          }); // Tasks without due date placed last
+          });
 
           setState(() {
             tasks = fetchedTasks;
@@ -230,7 +228,7 @@ class _TaskManagerScreenState extends State<TaskManagerScreen> with TickerProvid
         if (data['success'] == true) {
           setState(() => availableTags.removeWhere((t) => t.name == name));
           _showSnackBar('Tag deleted successfully!');
-          _loadTasks(); // Refresh tasks as tags may have been removed
+          _loadTasks();
         } else {
           _showSnackBar(data['message'] ?? 'Failed to delete tag', isError: true);
         }
@@ -256,7 +254,7 @@ class _TaskManagerScreenState extends State<TaskManagerScreen> with TickerProvid
         final data = json.decode(response.body);
         if (data['success'] == true) {
           _showSnackBar('Task added successfully!');
-          _loadTasks(); // reload tasks (sorted automatically)
+          _loadTasks(); 
         } else {
           _showSnackBar(data['message'] ?? 'Failed to add task', isError: true);
         }
@@ -284,7 +282,7 @@ class _TaskManagerScreenState extends State<TaskManagerScreen> with TickerProvid
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success'] == true) {
-          _loadTasks(); // reload tasks (sorted automatically)
+          _loadTasks();
         } else {
           _showSnackBar(data['message'] ?? 'Failed to update task', isError: true);
         }
@@ -342,12 +340,10 @@ class _TaskManagerScreenState extends State<TaskManagerScreen> with TickerProvid
       case 'all':
         return tasks;
       default:
-        // Filter by tag name
         return tasks.where((task) => task.tags.contains(selectedFilter)).toList();
     }
   }
 
-  // Determines if a given task matches the advanced search query
   bool _matchesSearch(Task task, String query) {
     final lowerQuery = query.toLowerCase();
     final parts = lowerQuery.split(RegExp(r'\s+'));
@@ -367,22 +363,18 @@ class _TaskManagerScreenState extends State<TaskManagerScreen> with TickerProvid
         searchTerms.add(part);
       }
     }
-    // Apply priority filter
     if (priorityFilter != null && task.priority.toLowerCase() != priorityFilter) {
       return false;
     }
-    // Apply status filter
     if (statusFilter != null) {
       if (statusFilter == 'pending' && task.isCompleted) return false;
       if (statusFilter == 'completed' && !task.isCompleted) return false;
     }
-    // Apply tag filters (all must match)
     for (var tag in tagFilters) {
       if (!task.tags.map((t) => t.toLowerCase()).contains(tag)) {
         return false;
       }
     }
-    // Check remaining search terms against title, description, priority, status, or tags
     for (var term in searchTerms) {
       final titleMatch = task.title.toLowerCase().contains(term);
       final descMatch = task.description.toLowerCase().contains(term);
@@ -399,7 +391,6 @@ class _TaskManagerScreenState extends State<TaskManagerScreen> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
-    // Determine which tasks to display (filter chip vs search)
     final List<Task> tasksToDisplay = _isSearching
         ? (_searchQuery.isEmpty
             ? tasks
@@ -452,7 +443,7 @@ class _TaskManagerScreenState extends State<TaskManagerScreen> with TickerProvid
               icon: Icon(Icons.search, color: Colors.grey[700]),
               onPressed: () {
                 setState(() {
-                  _isSearching = true; // Enter search mode
+                  _isSearching = true;
                 });
               },
             ),
@@ -615,14 +606,14 @@ class _TaskManagerScreenState extends State<TaskManagerScreen> with TickerProvid
                             );
                             _updateTask(updatedTask);
                           },
-                          behavior: HitTestBehavior.opaque, // Ensures taps are captured in the entire 48x48 area
+                          behavior: HitTestBehavior.opaque, 
                           child: Container(
-                            width: 48, // Larger tap area
-                            height: 48, // Larger tap area
+                            width: 48,
+                            height: 48,
                             alignment: Alignment.center,
                             child: Container(
-                              width: 24, // Visual size remains the same
-                              height: 24, // Visual size remains the same
+                              width: 24,
+                              height: 24, 
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: task.isCompleted ? Colors.green[400] : Colors.transparent,
